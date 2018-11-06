@@ -97,8 +97,10 @@ public class MainActivity extends AppCompatActivity {
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice d : pairedDevices) {
                 this.mBluetoothDeviceArrayAdapter.add(
-                        "[Paired]" + d.getName() + "\n"
-                        + "MAC: " + d.getAddress());
+                        d.getName() + "\n"
+                        + "MAC: " + d.getAddress() + "\n"
+                        + "Bond State: " + "Paired"
+                );
             }
             this.mBluetoothDeviceArrayAdapter.notifyDataSetChanged();
         }
@@ -115,10 +117,17 @@ public class MainActivity extends AppCompatActivity {
             String action = intent.getAction();
             if(BluetoothDevice.ACTION_FOUND.equals(action)) {
                 Log.i("Android Bluetooth Scanner", "Found bluetooth device.");
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                Log.i("Android Bluetooth Scanner", device.getName() + "\n" + device.getAddress());
-                if(device.getBondState() != BluetoothDevice.BOND_BONDED) {
-                    mBluetoothDeviceArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                BluetoothDevice d = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if(d.getBondState() != BluetoothDevice.BOND_BONDED) {
+                    String bondState = null;
+                    if(d.getBondState() == BluetoothDevice.BOND_BONDING) bondState = "Pairing";
+                    else if(d.getBondState() == BluetoothDevice.BOND_NONE) bondState = "Not Paired";
+                    else bondState = "Unknown";
+                    mBluetoothDeviceArrayAdapter.add(
+                            d.getName() + "\n"
+                            + "MAC: " + d.getAddress() + "\n"
+                            + "Bond State: " + bondState
+                    );
                     mBluetoothDeviceArrayAdapter.notifyDataSetChanged();
                 }
             } else if(BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
